@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing Adda - Login & Sign Up</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #e7eef0, #0e0f10);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: #fff;
+            width: 350px;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #ff512f, #dd2476);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #ff6b6b, #e94057);
+            transform: translateY(-2px);
+        }
+
+        .toggle-btn {
+            margin-top: 15px;
+            cursor: pointer;
+            color: #0072ff;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        .toggle-btn:hover {
+            text-decoration: underline;
+        }
+
+        .show-password {
+            float: right;
+            margin-top: -35px;
+            margin-right: 10px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #555;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 13px;
+            margin-top: -8px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .hidden {
+            display: none;
+        }
+        .background-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 100px;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.1);
+            white-space: nowrap;
+            pointer-events: none;
+            user-select: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-text">Billing Adda</div>
+    <!-- Login Container -->
+    <div class="container" id="login-container">
+        <h2>Login to Billing Adda</h2>
+        <div class="form-group">
+            <input type="email" id="login-email" placeholder="Enter your email">
+            <div class="error-message" id="login-email-error"></div>
+        </div>
+        <div class="form-group">
+            <input type="password" id="login-password" placeholder="Enter password">
+            <span class="show-password" onclick="togglePassword('login-password')">Show</span>
+            <div class="error-message" id="login-password-error"></div>
+        </div>
+        <button onclick="login()">Login</button>
+        <a class="toggle-btn" onclick="showSignUp()">New User? Sign Up</a>
+    </div>
+
+    <!-- Sign Up Container -->
+    <div class="container hidden" id="signup-container">
+        <h2>Create Account</h2>
+        <div class="form-group">
+            <input type="email" id="signup-email" placeholder="Enter your email">
+            <div class="error-message" id="signup-email-error"></div>
+        </div>
+        <div class="form-group">
+            <input type="password" id="signup-password" placeholder="Create password">
+            <span class="show-password" onclick="togglePassword('signup-password')">Show</span>
+            <div class="error-message" id="signup-password-error"></div>
+        </div>
+        <button onclick="signUp()">Sign Up</button>
+        <a class="toggle-btn" onclick="showLogin()">Already have an account? Login</a>
+    </div>
+
+    <!-- Firebase v8 JS -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyB1v04In2tAcT6VhtcxfYUGDe1u3knSdYI",
+            authDomain: "billingadda-52c61.firebaseapp.com",
+            projectId: "billingadda-52c61",
+            storageBucket: "billingadda-52c61.appspot.com",
+            messagingSenderId: "675031106116",
+            appId: "1:675031106116:web:9cfd6a086296cef983b211",
+            measurementId: "G-HRGYNC91S3"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Show/Hide password functionality
+        function togglePassword(inputId) {
+            const passwordInput = document.getElementById(inputId);
+            const showBtn = passwordInput.nextElementSibling;
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                showBtn.innerText = "Hide";
+            } else {
+                passwordInput.type = "password";
+                showBtn.innerText = "Show";
+            }
+        }
+
+        // Show/Hide containers
+        function showSignUp() {
+            document.getElementById('login-container').classList.add('hidden');
+            document.getElementById('signup-container').classList.remove('hidden');
+        }
+
+        function showLogin() {
+            document.getElementById('signup-container').classList.add('hidden');
+            document.getElementById('login-container').classList.remove('hidden');
+        }
+
+        // Show error message
+        function showError(id, message) {
+            const errorElement = document.getElementById(id);
+            errorElement.innerText = message;
+            errorElement.style.display = "block";
+        }
+
+        // Hide error message
+        function clearError(id) {
+            const errorElement = document.getElementById(id);
+            errorElement.innerText = "";
+            errorElement.style.display = "none";
+        }
+
+        // Email validation
+        function isValidEmail(email) {
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailPattern.test(email);
+        }
+
+        // Sign Up functionality using Firebase Auth
+        function signUp() {
+            const email = document.getElementById("signup-email").value;
+            const password = document.getElementById("signup-password").value;
+
+            clearError("signup-email-error");
+            clearError("signup-password-error");
+
+            if (email === "" || password === "") {
+                showError("signup-email-error", "All fields are required.");
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showError("signup-email-error", "Enter a valid email address.");
+                return;
+            }
+
+            // Firebase Sign Up
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    alert("Sign Up successful! 🎉 You can now log in.");
+                    showLogin();
+                })
+                .catch((error) => {
+                    showError("signup-email-error", error.message);
+                });
+        }
+
+        // Login functionality using Firebase Auth
+        function login() {
+            const email = document.getElementById("login-email").value;
+            const password = document.getElementById("login-password").value;
+
+            clearError("login-email-error");
+            clearError("login-password-error");
+
+            if (email === "" || password === "") {
+                showError("login-email-error", "All fields are required.");
+                return;
+            }
+
+            // Firebase Login
+            firebase.auth().signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    alert("Login successful! 🎉 Welcome to Billing Adda.");
+                    window.location.href = "billingAdda.html"; // Redirect to dashboard
+                })
+                .catch((error) => {
+                    showError("login-email-error", error.message);
+                });
+        }
+    </script>
+</body>
+
+</html>
